@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alek Techbuild - Innovative Building Solutions</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts - Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f2f5; /* Slightly darker light gray for more depth */
+        }
+        .section-padding {
+            padding: 5rem 1.5rem; /* Increased padding for more breathing room */
+        }
+        @media (min-width: 768px) {
+            .section-padding {
+                padding: 7rem 3rem;
+            }
+        }
+        @media (min-width: 1024px) {
+            .section-padding {
+                padding: 9rem 5rem;
+            }
+        }
+        /* Custom scroll-behavior for smooth scrolling */
+        html {
+            scroll-behavior: smooth;
+        }
+        /* Custom styles for professional look */
+        .card-hover-effect:hover {
+            transform: translateY(-8px) scale(1.02); /* More pronounced lift and slight scale */
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1); /* Stronger shadow on hover */
+        }
+        .btn-primary {
+            background-color: #1a73e8; /* Google Blue equivalent for primary actions */
+            color: white;
+            padding: 0.75rem 2rem;
+            border-radius: 9999px; /* Fully rounded */
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 10px rgba(26, 115, 232, 0.3);
+        }
+        .btn-primary:hover {
+            background-color: #155bb5;
+            box-shadow: 0 6px 15px rgba(26, 115, 232, 0.4);
+            transform: translateY(-2px);
+        }
+        .text-gradient-blue {
+            background: linear-gradient(to right, #1a73e8, #0a4f9e);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        /* Styles for the message box */
+        .message-box {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: white;
+            padding: 2rem;
+            border-radius: 0.75rem;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            text-align: center;
+            max-width: 90%;
+            width: 400px;
+            display: none; /* Hidden by default */
+        }
+        .message-box.show {
+            display: block;
+        }
+        .message-box-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+            display: none; /* Hidden by default */
+        }
+        .message-box-overlay.show {
+            display: block;
+        }
+        /* Styles for the add project modal */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1001;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+        .modal.show {
+            opacity: 1;
+            visibility: visible;
+        }
+        .modal-content {
+            background-color: white;
+            padding: 2.5rem;
+            border-radius: 0.75rem;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+            max-width: 500px;
+            width: 90%;
+            transform: translateY(-20px);
+            transition: transform 0.3s ease;
+        }
+        .modal.show .modal-content {
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body class="text-gray-800">
+
+    <!-- Message Box and Overlay -->
+    <div id="messageBoxOverlay" class="message-box-overlay"></div>
+    <div id="messageBox" class="message-box">
+        <p id="messageBoxText" class="text-lg font-medium text-gray-800 mb-6"></p>
+        <button id="messageBoxClose" class="bg-blue-600 text-white px-6 py-2 rounded-full hover:bg-blue-700 transition duration-300">Close</button>
+    </div>
+
+    <!-- Add Project Modal -->
+    <div id="addProjectModal" class="modal">
+        <div class="modal-content">
+            <h3 class="text-2xl font-bold text-gray-900 mb-6 text-center">Add New Project</h3>
+            <form id="addProjectForm" class="space-y-4">
+                <div>
+                    <label for="projectName" class="block text-gray-700 text-sm font-semibold mb-2">Project Name</label>
+                    <input type="text" id="projectName" placeholder="e.g., Eco-Friendly Office Tower"
+                           class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div>
+                    <label for="projectDescription" class="block text-gray-700 text-sm font-semibold mb-2">Project Description</label>
+                    <textarea id="projectDescription" placeholder="Briefly describe the project (e.g., key features, services provided)"
+                              rows="4" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+                </div>
+                <div>
+                    <label for="projectImageUrl" class="block text-gray-700 text-sm font-semibold mb-2">Image URL (Optional)</label>
+                    <input type="url" id="projectImageUrl" placeholder="e.g., https://placehold.co/600x400/D1E0FF/1A73E8?text=Your+Project"
+                           class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div class="flex justify-end gap-4 mt-6">
+                    <button type="button" id="cancelAddProject" class="px-6 py-2 rounded-full border border-gray-300 text-gray-700 hover:bg-gray-100 transition duration-300">Cancel</button>
+                    <button type="submit" class="btn-primary">Add Project</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Navigation Bar -->
+    <nav class="bg-white shadow-lg py-4 sticky top-0 z-50">
+        <div class="container mx-auto px-6 flex justify-between items-center">
+            <!-- Logo/Company Name -->
+            <a href="#home" class="text-2xl font-bold text-gray-900 flex items-center">
+                <!-- Simple SVG for logo placeholder, inspired by the prompt's color suggestions -->
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="mr-2">
+                    <path d="M12 2L2 7V17L12 22L22 17V7L12 2Z" fill="#1a73e8"/> <!-- Primary Blue -->
+                    <path d="M12 4.79L4.5 8.5V15.5L12 19.21L19.5 15.5V8.5L12 4.79Z" fill="#212121"/> <!-- Darker for contrast -->
+                    <path d="M12 10L17 12.5V17.5L12 20L7 17.5V12.5L12 10Z" fill="#EA4335"/> <!-- Google Red for accent -->
+                </svg>
+                Alek Techbuild
+            </a>
+
+            <!-- Mobile Menu Button -->
+            <div class="md:hidden">
+                <button id="mobile-menu-button" class="text-gray-600 focus:outline-none focus:text-gray-900">
+                    <svg class="h-7 w-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Desktop Navigation Links -->
+            <div class="hidden md:flex space-x-10">
+                <a href="#home" class="text-gray-700 hover:text-blue-700 font-medium transition duration-300 py-2">Home</a>
+                <a href="#about" class="text-gray-700 hover:text-blue-700 font-medium transition duration-300 py-2">About Us</a>
+                <a href="#services" class="text-gray-700 hover:text-blue-700 font-medium transition duration-300 py-2">Services</a>
+                <a href="#works" class="text-gray-700 hover:text-blue-700 font-medium transition duration-300 py-2">Our Works</a>
+                <a href="#goals" class="text-gray-700 hover:text-blue-700 font-medium transition duration-300 py-2">Goals</a>
+                <a href="#contact" class="text-gray-700 hover:text-blue-700 font-medium transition duration-300 py-2">Contact Us</a>
+            </div>
+        </div>
+
+        <!-- Mobile Menu (Hidden by default) -->
+        <div id="mobile-menu" class="md:hidden hidden bg-white py-2 border-t border-gray-200">
+            <a href="#home" class="block px-6 py-3 text-gray-800 hover:bg-gray-100 transition duration-300">Home</a>
+            <a href="#about" class="block px-6 py-3 text-gray-800 hover:bg-gray-100 transition duration-300">About Us</a>
+            <a href="#services" class="block px-6 py-3 text-gray-800 hover:bg-gray-100 transition duration-300">Services</a>
+            <a href="#works" class="block px-6 py-3 text-gray-800 hover:bg-gray-100 transition duration-300">Our Works</a>
+            <a href="#goals" class="block px-6 py-3 text-gray-800 hover:bg-gray-100 transition duration-300">Goals</a>
+            <a href="#contact" class="block px-6 py-3 text-gray-800 hover:bg-gray-100 transition duration-300">Contact Us</a>
+        </div>
+    </nav>
+
+    <!-- Home Section -->
+    <section id="home" class="relative bg-gradient-to-br from-blue-700 to-blue-900 text-white section-padding min-h-screen flex items-center justify-center text-center overflow-hidden">
+        <!-- Background elements (abstract shapes) -->
+        <div class="absolute inset-0 z-0 opacity-15">
+            <svg class="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid slice">
+                <circle cx="20" cy="20" r="15" fill="white" opacity="0.1"></circle>
+                <rect x="70" y="10" width="20" height="20" fill="white" opacity="0.08" transform="rotate(45 80 20)"></rect>
+                <polygon points="50,5 60,25 40,25" fill="white" opacity="0.12"></polygon>
+                <path d="M10 80 Q 30 95, 50 80 T 90 80" stroke="white" stroke-width="1" fill="none" opacity="0.1"></path>
+                <circle cx="85" cy="80" r="10" fill="white" opacity="0.05"></circle>
+            </svg>
+        </div>
+
+        <div class="container mx-auto z-10 max-w-5xl">
+            <h1 class="text-5xl md:text-7xl font-extrabold mb-5 leading-tight tracking-tight">Alek Techbuild</h1>
+            <p class="text-xl md:text-3xl font-light mb-8 text-blue-200">INNOVATION SKYLINING CONSTRUCTION</p>
+            <p class="text-lg md:text-xl max-w-4xl mx-auto mb-10 opacity-90">
+                Delivering exceptional building solutions through innovation, design, and engineering across Uganda.
+            </p>
+            <p class="text-md md:text-lg mb-12 opacity-80">
+                Founded by Lugayizi Benjamin on August 7th, 2024.
+            </p>
+            <a href="#contact" class="btn-primary">
+                Get a Free Consultation
+            </a>
+        </div>
+    </section>
+
+    <!-- About Us Section -->
+    <section id="about" class="bg-white section-padding">
+        <div class="container mx-auto max-w-6xl">
+            <h2 class="text-4xl font-bold text-center mb-16 text-gradient-blue">About Us</h2>
+
+            <div class="grid md:grid-cols-2 gap-16 items-start">
+                <div>
+                    <h3 class="text-3xl font-semibold mb-8 text-gray-900">Our Vision</h3>
+                    <p class="text-lg leading-relaxed text-gray-700 border-l-4 border-blue-500 pl-4 py-1">
+                        To be the global pioneer in redefining the built environment through innovative, sustainable, and technologically advanced design and engineering solutions.
+                    </p>
+                </div>
+                <div>
+                    <h3 class="text-3xl font-semibold mb-8 text-gray-900">Our Core Values</h3>
+                    <ul class="space-y-5 text-lg text-gray-700">
+                        <li class="flex items-start">
+                            <span class="text-blue-600 mr-4 text-3xl">✨</span>
+                            <div>
+                                <strong class="font-semibold text-gray-900">Innovation:</strong> Embracing new ideas and technologies to drive progress and redefine possibilities.
+                            </div>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="text-blue-600 mr-4 text-3xl">🎨</span>
+                            <div>
+                                <strong class="font-semibold text-gray-900">Design Excellence:</strong> Striving for aesthetic appeal, optimal functionality, and timeless quality in every project.
+                            </div>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="text-blue-600 mr-4 text-3xl">🛠️</span>
+                            <div>
+                                <strong class="font-semibold text-gray-900">Engineering Precision:</strong> Delivering structurally sound, efficient, and reliable solutions with meticulous attention to detail.
+                            </div>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="text-blue-600 mr-4 text-3xl">🤝</span>
+                            <div>
+                                <strong class="font-semibold text-gray-900">Client Focus:</strong> Prioritizing client satisfaction, fostering strong relationships, and exceeding expectations.
+                            </div>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="text-blue-600 mr-4 text-3xl">💎</span>
+                            <div>
+                                <strong class="font-semibold text-gray-900">Quality:</strong> Committing to exceptional workmanship, premium materials, and unparalleled attention to detail in all endeavors.
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="mt-20 text-center">
+                <h3 class="text-3xl font-semibold mb-10 text-gray-900">Why Choose Alek Techbuild?</h3>
+                <div class="grid sm:grid-cols-1 md:grid-cols-3 gap-10 max-w-5xl mx-auto">
+                    <div class="bg-blue-50 p-8 rounded-xl shadow-lg flex flex-col items-center card-hover-effect transition duration-300">
+                        <span class="text-6xl mb-5">🌍</span>
+                        <h4 class="text-xl font-semibold mb-3 text-gray-900">Local & Global Expertise</h4>
+                        <p class="text-gray-700 text-center">Combining international best practices with deep local understanding for superior results.</p>
+                    </div>
+                    <div class="bg-blue-50 p-8 rounded-xl shadow-lg flex flex-col items-center card-hover-effect transition duration-300">
+                        <span class="text-6xl mb-5">🏫</span>
+                        <h4 class="text-xl font-semibold mb-3 text-gray-900">Community Support</h4>
+                        <p class="text-gray-700 text-center">Enjoy a 10% discount on services for schools and clinics, investing in our community's future.</p>
+                    </div>
+                    <div class="bg-blue-50 p-8 rounded-xl shadow-lg flex flex-col items-center card-hover-effect transition duration-300">
+                        <span class="text-6xl mb-5">💬</span>
+                        <h4 class="text-xl font-semibold mb-3 text-gray-900">Complimentary Consultation</h4>
+                        <p class="text-gray-700 text-center">Begin your project journey with a no-obligation discussion with our experienced team.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Services Section -->
+    <section id="services" class="bg-gray-100 section-padding">
+        <div class="container mx-auto max-w-6xl">
+            <h2 class="text-4xl font-bold text-center mb-16 text-gradient-blue">Our Comprehensive Services</h2>
+
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-10">
+                <!-- Service Category 1: DESIGN & ENGINEERING -->
+                <div class="bg-white p-8 rounded-xl shadow-lg card-hover-effect transition duration-300">
+                    <h3 class="text-2xl font-bold text-blue-700 mb-6 flex items-center">
+                        <span class="mr-4 text-4xl">🏗️</span> DESIGN & ENGINEERING
+                    </h3>
+                    <ul class="space-y-4 text-gray-700">
+                        <li>
+                            <strong class="font-semibold text-gray-900">Structural Analysis & Design:</strong> UGX 500K – 3M
+                        </li>
+                        <li>
+                            <strong class="font-semibold text-gray-900">3D Modeling (Interior/Exterior):</strong> UGX 300K – 1.5M
+                        </li>
+                        <li>
+                            <strong class="font-semibold text-gray-900">Architectural Plans:</strong>
+                            <ul class="list-disc list-inside ml-6 mt-2 space-y-1">
+                                <li>Non-Stamped: UGX 300K – 1.5M</li>
+                                <li><strong class="text-blue-600">Stamped & Certified:</strong> UGX 1M – 5M</li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Service Category 2: COST & DOCUMENTATION -->
+                <div class="bg-white p-8 rounded-xl shadow-lg card-hover-effect transition duration-300">
+                    <h3 class="text-2xl font-bold text-blue-700 mb-6 flex items-center">
+                        <span class="mr-4 text-4xl">📊</span> COST & DOCUMENTATION
+                    </h3>
+                    <ul class="space-y-4 text-gray-700">
+                        <li>
+                            <strong class="font-semibold text-gray-900">Bill of Quantities (BOQ):</strong> UGX 400K – 2M
+                        </li>
+                        <li>
+                            <strong class="font-semibold text-gray-900">Value Engineering:</strong> Save 10–20% | UGX 300K – 1.5M
+                        </li>
+                        <li>
+                            <strong class="font-semibold text-gray-900">Permit Assistance:</strong> Fast-track KCCA/NEMA approvals | UGX 500K – 2M
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Service Category 3: PROJECT MANAGEMENT -->
+                <div class="bg-white p-8 rounded-xl shadow-lg card-hover-effect transition duration-300">
+                    <h3 class="text-2xl font-bold text-blue-700 mb-6 flex items-center">
+                        <span class="mr-4 text-4xl">👷‍♂️</span> PROJECT MANAGEMENT
+                    </h3>
+                    <ul class="space-y-4 text-gray-700">
+                        <li>
+                            <strong class="font-semibold text-gray-900">Construction Supervision:</strong> UGX 1.5M – 8M/month
+                        </li>
+                        <li>
+                            <strong class="font-semibold text-gray-900">Remote Management:</strong> UGX 800K – 3M/month
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Service Category 4: TECH & INNOVATION -->
+                <div class="bg-white p-8 rounded-xl shadow-lg card-hover-effect transition duration-300">
+                    <h3 class="text-2xl font-bold text-blue-700 mb-6 flex items-center">
+                        <span class="mr-4 text-4xl">💡</span> TECH & INNOVATION
+                    </h3>
+                    <ul class="space-y-4 text-gray-700">
+                        <li>
+                            <strong class="font-semibold text-gray-900">3D Renders/Virtual Tours:</strong> UGX 200K – 1.2M
+                        </li>
+                        <li>
+                            <strong class="font-semibold text-gray-900">Structural Health Monitoring (IoT):</strong> UGX 1.5M – 5M
+                        </li>
+                        <li>
+                            <strong class="font-semibold text-gray-900">BIM Coordination:</strong> UGX 800K – 4M
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Service Category 5: SUSTAINABILITY -->
+                <div class="bg-white p-8 rounded-xl shadow-lg card-hover-effect transition duration-300">
+                    <h3 class="text-2xl font-bold text-blue-700 mb-6 flex items-center">
+                        <span class="mr-4 text-4xl">🌿</span> SUSTAINABILITY
+                    </h3>
+                    <ul class="space-y-4 text-gray-700">
+                        <li>
+                            <strong class="font-semibold text-gray-900">Green Certification (EDGE/LEED):</strong> UGX 2M – 8M
+                        </li>
+                        <li>
+                            <strong class="font-semibold text-gray-900">CAD/BIM Training:</strong> UGX 150K – 500K/person
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <p class="text-center text-xl mt-16 text-gray-700">
+                <strong class="text-blue-700">Looking for a tailored solution?</strong> Let’s discuss your custom package needs! 💌
+            </p>
+        </div>
+    </section>
+
+    <!-- Our Works Section -->
+    <section id="works" class="bg-white section-padding">
+        <div class="container mx-auto max-w-6xl">
+            <h2 class="text-4xl font-bold text-center mb-16 text-gradient-blue">Our Portfolio</h2>
+            <p class="text-lg text-center text-gray-700 mb-12 max-w-3xl mx-auto">
+                Explore a selection of our recent projects that exemplify our dedication to innovative design, engineering precision, and sustainable building solutions.
+            </p>
+
+            <!-- Project Idea Generator Feature -->
+            <div class="bg-blue-50 p-8 rounded-xl shadow-lg mb-12 text-center">
+                <h3 class="text-2xl font-semibold text-gray-900 mb-6">Spark Your Next Project Idea ✨</h3>
+                <p class="text-gray-700 mb-6 max-w-2xl mx-auto">
+                    Tell us a type of project you're thinking about (e.g., "eco-friendly residential," "smart commercial building," "community center") and let our AI inspire you!
+                </p>
+                <div class="flex flex-col sm:flex-row justify-center items-center gap-4 mb-6">
+                    <input type="text" id="projectIdeaInput" placeholder="e.g., sustainable urban development"
+                           class="w-full sm:w-2/3 p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
+                    <button id="generateIdeaButton" class="btn-primary flex items-center justify-center w-full sm:w-auto">
+                        <svg id="generateIdeaSpinner" class="animate-spin h-5 w-5 text-white mr-3 hidden" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Generate Idea
+                    </button>
+                </div>
+                <div id="generatedIdeaOutput" class="bg-white p-6 rounded-lg shadow-md text-left hidden">
+                    <h4 class="text-xl font-semibold text-gray-900 mb-3" id="generatedIdeaTitle"></h4>
+                    <p class="text-gray-700 leading-relaxed" id="generatedIdeaDescription"></p>
+                </div>
+            </div>
+
+            <!-- Button to Add New Project -->
+            <div class="text-center mb-12">
+                <button id="openAddProjectModal" class="btn-primary flex items-center justify-center mx-auto">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
+                    Add New Project to Portfolio
+                </button>
+            </div>
+
+            <div id="portfolioProjectsContainer" class="grid md:grid-cols-2 lg:grid-cols-3 gap-10">
+                <!-- Existing Project Cards (will be dynamically loaded by JS) -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Goals Section -->
+    <section id="goals" class="bg-gray-100 section-padding">
+        <div class="container mx-auto max-w-6xl">
+            <h2 class="text-4xl font-bold text-center mb-16 text-gradient-blue">Our Strategic Goals</h2>
+
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-10">
+                <!-- Market Leadership -->
+                <div class="bg-white p-8 rounded-xl shadow-lg card-hover-effect transition duration-300">
+                    <h3 class="text-2xl font-semibold text-blue-700 mb-5 flex items-center">
+                        <span class="mr-4 text-3xl">🏆</span> Market Leadership
+                    </h3>
+                    <ul class="list-disc list-inside space-y-3 text-gray-700 text-lg">
+                        <li>Become the leading provider of innovative building solutions in Uganda.</li>
+                        <li>Expand our geographic footprint to achieve national recognition.</li>
+                    </ul>
+                </div>
+
+                <!-- Innovation and Technology -->
+                <div class="bg-white p-8 rounded-xl shadow-lg card-hover-effect transition duration-300">
+                    <h3 class="text-2xl font-semibold text-blue-700 mb-5 flex items-center">
+                        <span class="mr-4 text-3xl">🚀</span> Innovation & Technology
+                    </h3>
+                    <ul class="list-disc list-inside space-y-3 text-gray-700 text-lg">
+                        <li>Develop and implement cutting-edge design and engineering technologies.</li>
+                        <li>Establish a dedicated R&D department to foster continuous innovation.</li>
+                    </ul>
+                </div>
+
+                <!-- Client Satisfaction -->
+                <div class="bg-white p-8 rounded-xl shadow-lg card-hover-effect transition duration-300">
+                    <h3 class="text-2xl font-semibold text-blue-700 mb-5 flex items-center">
+                        <span class="mr-4 text-3xl">🌟</span> Client Satisfaction
+                    </h3>
+                    <ul class="list-disc list-inside space-y-3 text-gray-700 text-lg">
+                        <li>Achieve an industry-leading 97% customer satisfaction rating.</li>
+                        <li>Cultivate long-term partnerships built on trust and mutual success.</li>
+                    </ul>
+                </div>
+
+                <!-- Industry Recognition -->
+                <div class="bg-white p-8 rounded-xl shadow-lg card-hover-effect transition duration-300">
+                    <h3 class="text-2xl font-semibold text-blue-700 mb-5 flex items-center">
+                        <span class="mr-4 text-3xl">🏅</span> Industry Recognition
+                    </h3>
+                    <ul class="list-disc list-inside space-y-3 text-gray-700 text-lg">
+                        <li>Win prestigious industry awards for design and engineering excellence.</li>
+                        <li>Become a recognized thought leader through publications and conferences.</li>
+                    </ul>
+                </div>
+
+                <!-- Financial Growth -->
+                <div class="bg-white p-8 rounded-xl shadow-lg card-hover-effect transition duration-300">
+                    <h3 class="text-2xl font-semibold text-blue-700 mb-5 flex items-center">
+                        <span class="mr-4 text-3xl">📈</span> Financial Growth
+                    </h3>
+                    <ul class="list-disc list-inside space-y-3 text-gray-700 text-lg">
+                        <li>Achieve ambitious revenue and profit growth targets year-over-year.</li>
+                        <li>Diversify our service portfolio to enhance revenue streams.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Us Section -->
+    <section id="contact" class="bg-blue-800 text-white section-padding">
+        <div class="container mx-auto text-center max-w-4xl">
+            <h2 class="text-4xl font-bold mb-12">Connect With Us</h2>
+            <p class="text-lg md:text-xl mb-10 opacity-90">
+                Based in Kampala, we proudly serve clients nationwide. Reach out today for a complimentary consultation or to discuss how we can bring your vision to life.
+            </p>
+
+            <div class="flex flex-wrap justify-center gap-8 text-lg">
+                <div class="flex items-center bg-blue-700 p-5 rounded-lg shadow-xl">
+                    <svg class="w-7 h-7 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path></svg>
+                    <a href="tel:+256700123456" class="hover:underline font-medium">+256 700 123 456</a>
+                </div>
+                <div class="flex items-center bg-blue-700 p-5 rounded-lg shadow-xl">
+                    <svg class="w-7 h-7 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                    <a href="mailto:hello@alektechbuild.ug" class="hover:underline font-medium">hello@alektechbuild.ug</a>
+                </div>
+                <div class="flex items-center bg-blue-700 p-5 rounded-lg shadow-xl">
+                    <svg class="w-7 h-7 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                    <a href="https://www.alektechbuild.ug" target="_blank" rel="noopener noreferrer" class="hover:underline font-medium">www.alektechbuild.ug</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white py-10 text-center">
+        <div class="container mx-auto px-6">
+            <p class="text-lg">&copy; 2024 Alek Techbuild. All rights reserved.</p>
+            <p class="mt-3 text-sm opacity-80">
+                Crafted with <span class="text-red-500">&hearts;</span> for a Future of Innovation in Construction.
+            </p>
+        </div>
+    </footer>
+
+    <script>
+        // Function to show a custom message box
+        function showMessageBox(message) {
+            const messageBox = document.getElementById('messageBox');
+            const messageBoxText = document.getElementById('messageBoxText');
+            const messageBoxOverlay = document.getElementById('messageBoxOverlay');
+
+            messageBoxText.innerHTML = message; // Use innerHTML to allow for bold/line breaks
+            messageBox.classList.add('show');
+            messageBoxOverlay.classList.add('show');
+        }
+
+        // Function to hide the custom message box
+        function hideMessageBox() {
+            const messageBox = document.getElementById('messageBox');
+            const messageBoxOverlay = document.getElementById('messageBoxOverlay');
+            messageBox.classList.remove('show');
+            messageBoxOverlay.classList.remove('show');
+        }
+
+        // Event listener for message box close button
+        document.getElementById('messageBoxClose').addEventListener('click', hideMessageBox);
+        document.getElementById('messageBoxOverlay').addEventListener('click', hideMessageBox); // Close on overlay click
+
+        // Smooth scrolling for navigation links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+
+                // Close mobile menu if open
+                const mobileMenu = document.getElementById('mobile-menu');
+                if (!mobileMenu.classList.contains('hidden')) {
+                    mobileMenu.classList.add('hidden');
+                }
+            });
+        });
+
+        // Mobile menu toggle
+        const mobileMenuButton = document.getElementById('mobile-menu-button');
+        const mobileMenu = document.getElementById('mobile-menu');
+
+        mobileMenuButton.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+        });
+
+        // Gemini API Integration: Project Idea Generator
+        const generateIdeaButton = document.getElementById('generateIdeaButton');
+        const projectIdeaInput = document.getElementById('projectIdeaInput');
+        const generatedIdeaOutput = document.getElementById('generatedIdeaOutput');
+        const generatedIdeaTitle = document.getElementById('generatedIdeaTitle');
+        const generatedIdeaDescription = document.getElementById('generatedIdeaDescription');
+        const generateIdeaSpinner = document.getElementById('generateIdeaSpinner');
+
+        generateIdeaButton.addEventListener('click', async () => {
+            const userPrompt = projectIdeaInput.value.trim();
+            if (!userPrompt) {
+                showMessageBox("Please enter a project type to generate an idea.");
+                return;
+            }
+
+            // Show loading spinner
+            generateIdeaSpinner.classList.remove('hidden');
+            generateIdeaButton.disabled = true;
+            generatedIdeaOutput.classList.add('hidden'); // Hide previous output
+
+            try {
+                let chatHistory = [];
+                const prompt = `Generate a unique and innovative construction project idea based on the following type: "${userPrompt}". Provide a project name and a brief, compelling description (around 3-5 sentences) of its key features and benefits, suitable for a company like Alek Techbuild. Format the response as a JSON object with "projectName" and "projectDescription" keys.`;
+                chatHistory.push({ role: "user", parts: [{ text: prompt }] });
+
+                const payload = {
+                    contents: chatHistory,
+                    generationConfig: {
+                        responseMimeType: "application/json",
+                        responseSchema: {
+                            type: "OBJECT",
+                            properties: {
+                                "projectName": { "type": "STRING" },
+                                "projectDescription": { "type": "STRING" }
+                            },
+                            "propertyOrdering": ["projectName", "projectDescription"]
+                        }
+                    }
+                };
+
+                const apiKey = ""; // Canvas will automatically provide the API key
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const result = await response.json();
+
+                if (result.candidates && result.candidates.length > 0 &&
+                    result.candidates[0].content && result.candidates[0].content.parts &&
+                    result.candidates[0].content.parts.length > 0) {
+                    const jsonString = result.candidates[0].content.parts[0].text;
+                    const parsedJson = JSON.parse(jsonString);
+
+                    generatedIdeaTitle.textContent = parsedJson.projectName || "Generated Project Idea";
+                    generatedIdeaDescription.textContent = parsedJson.projectDescription || "No description available.";
+                    generatedIdeaOutput.classList.remove('hidden');
+                } else {
+                    showMessageBox("Failed to generate project idea. Please try again.");
+                }
+            } catch (error) {
+                console.error("Error generating project idea:", error);
+                showMessageBox("An error occurred while generating the project idea. Please try again later.");
+            } finally {
+                // Hide loading spinner
+                generateIdeaSpinner.classList.add('hidden');
+                generateIdeaButton.disabled = false;
+            }
+        });
+
+        // Portfolio Management
+        const portfolioProjectsContainer = document.getElementById('portfolioProjectsContainer');
+        const openAddProjectModalButton = document.getElementById('openAddProjectModal');
+        const addProjectModal = document.getElementById('addProjectModal');
+        const cancelAddProjectButton = document.getElementById('cancelAddProject');
+        const addProjectForm = document.getElementById('addProjectForm');
+        const projectNameInput = document.getElementById('projectName');
+        const projectDescriptionInput = document.getElementById('projectDescription');
+        const projectImageUrlInput = document.getElementById('projectImageUrl');
+
+        // Initial projects (can be loaded from a data source later)
+        let projects = [
+            {
+                name: "Modern Office Complex",
+                description: "Designed and supervised the construction of a state-of-the-art office complex, integrating sustainable practices and smart building technology.",
+                imageUrl: "https://placehold.co/600x400/D1E0FF/1A73E8?text=Project+1"
+            },
+            {
+                name: "Luxury Residential Estate",
+                description: "Full architectural and structural design for a multi-unit residential development, focusing on modern aesthetics and efficient space utilization.",
+                imageUrl: "https://placehold.co/600x400/D1E0FF/1A73E8?text=Project+2"
+            },
+            {
+                name: "Advanced Industrial Facility",
+                description: "Provided comprehensive BIM coordination and value engineering services for a large-scale industrial warehouse project, optimizing costs and efficiency.",
+                imageUrl: "https://placehold.co/600x400/D1E0FF/1A73E8?text=Project+3"
+            },
+            {
+                name: "Eco-Friendly Educational Hub",
+                description: "Developed a sustainable design for a new school, aiming for EDGE/LEED certification and incorporating eco-friendly materials.",
+                imageUrl: "https://placehold.co/600x400/D1E0FF/1A73E8?text=Project+4"
+            },
+            {
+                name: "Smart Infrastructure Monitoring",
+                description: "Implemented structural health monitoring systems using IoT sensors for an existing bridge, ensuring long-term safety and predictive maintenance.",
+                imageUrl: "https://placehold.co/600x400/D1E0FF/1A73E8?text=Project+5"
+            },
+            {
+                name: "Strategic Urban Development",
+                description: "Assisted in urban planning and permit acquisition for a new city district, streamlining approvals with KCCA/NEMA.",
+                imageUrl: "https://placehold.co/600x400/D1E0FF/1A73E8?text=Project+6"
+            }
+        ];
+
+        // Function to render projects
+        function renderProjects() {
+            portfolioProjectsContainer.innerHTML = ''; // Clear existing projects
+            projects.forEach(project => {
+                const projectCard = document.createElement('div');
+                projectCard.className = 'bg-gray-50 rounded-xl shadow-lg overflow-hidden card-hover-effect transition duration-300';
+                projectCard.innerHTML = `
+                    <img src="${project.imageUrl}" alt="${project.name}" class="w-full h-56 object-cover object-center" onerror="this.onerror=null;this.src='https://placehold.co/600x400/CCCCCC/333333?text=Image+Not+Found';">
+                    <div class="p-7">
+                        <h3 class="text-2xl font-semibold text-gray-900 mb-3">${project.name}</h3>
+                        <p class="text-gray-700 mb-5 leading-relaxed">${project.description}</p>
+                        <a href="#" class="text-blue-700 hover:text-blue-900 font-medium flex items-center">
+                            View Project <span class="ml-2">→</span>
+                        </a>
+                    </div>
+                `;
+                portfolioProjectsContainer.appendChild(projectCard);
+            });
+        }
+
+        // Show Add Project Modal
+        openAddProjectModalButton.addEventListener('click', () => {
+            addProjectModal.classList.add('show');
+        });
+
+        // Hide Add Project Modal
+        cancelAddProjectButton.addEventListener('click', () => {
+            addProjectModal.classList.remove('show');
+            addProjectForm.reset(); // Clear form fields
+        });
+
+        // Handle Add Project Form Submission
+        addProjectForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+
+            const name = projectNameInput.value.trim();
+            const description = projectDescriptionInput.value.trim();
+            const imageUrl = projectImageUrlInput.value.trim();
+
+            if (!name || !description) {
+                showMessageBox("Please fill in both Project Name and Description.");
+                return;
+            }
+
+            const newProject = {
+                name: name,
+                description: description,
+                imageUrl: imageUrl || "https://placehold.co/600x400/D1E0FF/1A73E8?text=New+Project" // Default image if none provided
+            };
+
+            projects.push(newProject);
+            renderProjects(); // Re-render the portfolio with the new project
+            addProjectModal.classList.remove('show'); // Hide the modal
+            addProjectForm.reset(); // Clear form fields
+            showMessageBox("Project added successfully!");
+        });
+
+        // Initial render of projects when the page loads
+        document.addEventListener('DOMContentLoaded', renderProjects);
+    </script>
+</body>
+</html>
